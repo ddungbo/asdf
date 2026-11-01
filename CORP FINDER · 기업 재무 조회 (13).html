@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CORP FINDER · 기업 재무 조회</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+:root{--black:#000;--white:#fff;--g1:#f4f4f4;--g2:#e5e5e5;--g3:#bdbdbd;--g4:#8c8c8c;--g5:#555;--blue:#0078ff;--red:#f0384b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--white);color:var(--black);font-family:Pretendard,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.2px}
+button{font-family:inherit;cursor:pointer}
+button:disabled{cursor:default}
+.topbar{background:var(--black);color:var(--white);font-size:12px;text-align:center;padding:8px 0;letter-spacing:0}
+header{position:sticky;top:0;z-index:10;background:var(--white);border-bottom:1px solid var(--black)}
+.head-in{max-width:1100px;margin:0 auto;padding:14px 20px 10px}
+.head-row{display:flex;align-items:center;gap:24px}
+.logo{font-size:24px;font-weight:900;letter-spacing:-1px;white-space:nowrap;cursor:pointer;line-height:1}
+.logo span{color:var(--blue)}
+#form{flex:1;display:flex;background:var(--g1);height:44px}
+#form input[type=text]{flex:1;border:0;background:transparent;padding:0 16px;font-size:15px;font-family:inherit;outline:none;min-width:0}
+#form input[type=text]::placeholder{color:var(--g4)}
+#form:focus-within{outline:2px solid var(--black)}
+#btn{width:84px;border:0;background:var(--black);color:var(--white);font-size:14px;font-weight:700}
+#btn:disabled{background:var(--g3)}
+.opt{margin-top:8px;font-size:12px;color:var(--g4)}
+.opt label{cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.opt input{accent-color:var(--black);margin:0}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 80px;min-height:60vh}
+.hero{padding:48px 0 24px}
+.hero h1{font-size:40px;line-height:1.2;margin:0 0 14px;font-weight:800;letter-spacing:-1.5px}
+.hero p{color:var(--g4);margin:0 0 28px;font-size:15px;line-height:1.6}
+.kw-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.kws{display:flex;flex-wrap:wrap;gap:8px}
+.kw{border:1px solid var(--g2);background:var(--white);padding:9px 14px;font-size:13px}
+.kw:hover{border-color:var(--black)}
+.msg{text-align:center;color:var(--g4);padding:80px 0;line-height:1.8;font-size:14px}
+.spin{width:26px;height:26px;border:3px solid var(--g2);border-top-color:var(--black);border-radius:50%;margin:0 auto 14px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.err{border:1px solid var(--black);padding:22px 24px;line-height:1.7}
+.err b{font-size:16px}
+.err ul{margin:8px 0 0 18px;padding:0;color:var(--g5);font-size:14px}
+.warn{background:var(--g1);padding:14px 16px;margin-top:16px;font-size:13px;color:var(--g5);white-space:pre-line;line-height:1.6}
+.list-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:4px}
+.list-head h2{margin:0;font-size:20px;font-weight:800}
+.list-head h2 em{font-style:normal;color:var(--blue)}
+.list-head small{color:var(--g4);font-size:12px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--g2);background:var(--white);color:var(--black);padding:8px 14px;font-size:13px;border-radius:0}
+.chip small{color:var(--g4);margin-left:5px;font-weight:600}
+.chip.on{background:var(--black);border-color:var(--black);color:var(--white)}
+.chip.on small{color:var(--g3)}
+.progress{font-size:12px;color:var(--g4);margin-bottom:14px}
+.bar{height:2px;background:var(--g2);margin:6px 0 16px}
+.bar i{display:block;height:100%;background:var(--black);transition:width .2s}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:28px 14px;margin-top:16px}
+.card{cursor:pointer;outline:none}
+.thumb{position:relative;aspect-ratio:1/1;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:72px;font-weight:900;color:var(--g2);overflow:hidden}
+.card:hover .thumb,.card:focus-visible .thumb{background:var(--g2);color:var(--white)}
+.tag{position:absolute;left:8px;top:8px;font-size:11px;font-weight:700;padding:3px 7px;background:var(--white);color:var(--g4);border:1px solid var(--g2)}
+.tag.t1{background:var(--black);color:var(--white);border-color:var(--black)}
+.tag.t2{background:var(--g5);color:var(--white);border-color:var(--g5)}
+.tag.t3{background:var(--white);color:var(--black);border-color:var(--black)}
+.tag.t4{background:var(--white);color:var(--g5)}
+.card .nm{margin-top:10px;font-size:14px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .sub{margin-top:4px;font-size:12px;color:var(--g4);line-height:1.5}
+.card .no{margin-top:6px;font-size:13px;font-weight:800;letter-spacing:.3px}
+.back{border:0;background:none;padding:0;font-size:13px;color:var(--g5);margin-bottom:18px}
+.back:hover{color:var(--black);text-decoration:underline}
+.d-top{display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap;border-bottom:1px solid var(--black);padding-bottom:18px}
+.d-top .lbl{font-size:12px;font-weight:700;padding:3px 8px;display:inline-block;margin-bottom:10px}
+.lbl.t1{background:var(--black);color:var(--white)}
+.lbl.t2{background:var(--g5);color:var(--white)}
+.lbl.t3{border:1px solid var(--black)}
+.lbl.t4{border:1px solid var(--g3);color:var(--g5)}
+.lbl.unk{border:1px solid var(--g2);color:var(--g4)}
+.d-top h2{margin:0;font-size:30px;font-weight:800;letter-spacing:-1px}
+.d-top .no{margin-top:6px;color:var(--blue);font-weight:700;letter-spacing:.5px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-bottom:1px solid var(--g2)}
+.kpi{padding:22px 0}
+.kpi+.kpi{padding-left:20px;border-left:1px solid var(--g2)}
+.kpi .k{font-size:12px;color:var(--g4);margin-bottom:8px}
+.kpi .v{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.kpi .v.neg{color:var(--red)}
+.tabs{display:flex;gap:22px;margin:26px 0 0;border-bottom:1px solid var(--g2)}
+.tab{border:0;background:none;padding:0 0 12px;font-size:15px;font-weight:700;color:var(--g4);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--black);border-bottom-color:var(--black)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th,td{padding:15px 12px;border-bottom:1px solid var(--g2);text-align:right;white-space:nowrap}
+th{font-size:12px;color:var(--g4);font-weight:600}
+th:first-child,td:first-child{text-align:left;padding-left:0;position:sticky;left:0;background:var(--white);font-weight:600}
+td{font-weight:600;font-variant-numeric:tabular-nums}
+td.neg{color:var(--red)}
+td.na{color:var(--g3)}
+tr:last-child td{border-bottom:1px solid var(--black)}
+.note{font-size:12px;color:var(--g4);margin-top:14px;line-height:1.7}
+details{margin-top:18px;font-size:13px}
+summary{cursor:pointer;color:var(--g5)}
+pre{background:var(--g1);color:#222;padding:14px;overflow:auto;font-size:12px;white-space:pre-wrap;word-break:break-all;max-height:280px}
+footer{border-top:1px solid var(--g2);padding:28px 20px;text-align:center;font-size:12px;color:var(--g4);line-height:1.7}
+@media(max-width:640px){
+.head-row{gap:12px}.logo{font-size:19px}.hero h1{font-size:28px}
+.grid{grid-template-columns:repeat(2,1fr);gap:22px 10px}.thumb{font-size:56px}
+.d-top h2{font-size:24px}.kpi .v{font-size:20px}}
+
+/* 상담하기 */
+.cs-open{margin-top:16px;border:0;background:var(--black);color:var(--white);padding:12px 26px;font-size:14px;font-weight:700}
+.cs-open:hover{background:var(--blue)}
+.cs-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.cs-overlay[hidden]{display:none}
+.cs-phone{position:relative;width:min(360px,100%);height:min(700px,calc(100vh - 32px));background:var(--black);border-radius:44px;padding:12px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.cs-notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:110px;height:24px;background:var(--black);border-radius:0 0 16px 16px;z-index:3}
+.cs-screen{position:relative;width:100%;height:100%;background:var(--white);border-radius:34px;overflow:hidden;display:flex;flex-direction:column;text-align:left}
+.cs-x{position:absolute;top:38px;right:18px;z-index:4;width:30px;height:30px;border:0;background:var(--g1);border-radius:50%;font-size:18px;line-height:1;color:var(--g5)}
+.cs-x:hover{background:var(--g2);color:var(--black)}
+.cs-dots{display:flex;gap:6px;padding:46px 22px 0;flex:none}
+.cs-dots i{flex:1;height:3px;background:var(--g2)}
+.cs-dots i.on{background:var(--black)}
+.cs-body{flex:1;min-height:0;overflow-y:auto;padding:22px;display:flex;flex-direction:column}
+.cs-h{margin:0 0 6px;font-size:22px;font-weight:800;letter-spacing:-.8px;line-height:1.3}
+.cs-sub{margin:0 0 20px;font-size:13px;color:var(--g4);line-height:1.5}
+.cs-opt{width:100%;display:flex;gap:14px;align-items:center;text-align:left;border:1px solid var(--g2);background:var(--white);padding:14px;margin-bottom:10px;flex:none}
+.cs-opt:hover{border-color:var(--black)}
+.cs-opt.on{border-color:var(--black);background:var(--g1)}
+.cs-ic{flex:none;width:40px;height:40px;background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.cs-opt b{display:block;font-size:15px;margin-bottom:3px}
+.cs-opt span{font-size:12px;color:var(--g4);line-height:1.4}
+.cs-field input{width:100%;height:50px;border:0;background:var(--g1);padding:0 16px;font-size:16px;font-family:inherit;outline:none}
+.cs-field input:focus{outline:2px solid var(--black)}
+.cs-err{min-height:18px;margin-top:8px;font-size:12px;color:var(--red);line-height:1.4}
+.cs-sum{background:var(--g1);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--g5);line-height:1.6}
+.cs-sum b{color:var(--black)}
+.cs-agree{display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-size:12px;color:var(--g5);line-height:1.5;cursor:pointer}
+.cs-agree input{accent-color:var(--black);margin:2px 0 0;flex:none}
+.cs-actions{margin-top:auto;padding-top:16px;display:flex;gap:8px;flex:none}
+.cs-btn{flex:1;height:48px;border:1px solid var(--black);background:var(--black);color:var(--white);font-size:14px;font-weight:700}
+.cs-btn.ghost{background:var(--white);color:var(--black);border-color:var(--g2)}
+.cs-btn.ghost:hover{border-color:var(--black)}
+.cs-btn:disabled{background:var(--g3);border-color:var(--g3);color:var(--white)}
+.cs-done{margin:auto 0;text-align:center}
+.cs-check{width:64px;height:64px;margin:0 auto 18px;border-radius:50%;background:var(--black);color:var(--white);font-size:30px;display:flex;align-items:center;justify-content:center}
+.cs-done .cs-h{margin-bottom:8px}
+.cs-done+.cs-actions{margin-top:0}
+</style>
+</head>
+<body>
+<div class="topbar">금융위원회 기업 재무정보 · 공공데이터포털 API</div>
+
+<header>
+  <div class="head-in">
+    <div class="head-row">
+      <div class="logo" id="logo">CORP<span>.</span>FINDER</div>
+      <form id="form">
+        <input type="text" id="q" placeholder="회사명 또는 법인등록번호 13자리" autocomplete="off" autofocus />
+        <button id="btn" type="submit">검색</button>
+      </form>
+    </div>
+    <div class="opt">
+      <label><input type="checkbox" id="autoTier" checked /> 검색 결과를 규모 단계로 자동 분류 (후보 1곳당 API 1~2건 추가 사용)</label>
+    </div>
+  </div>
+</header>
+
+<main id="result"></main>
+
+<footer>
+  본 서비스는 공공데이터포털(금융위원회) 데이터를 활용하며, 정보의 정확성을 보장하지 않습니다.<br>
+  디자인은 무신사 스타일을 참고한 개인 프로젝트입니다.
+  <div><button type="button" class="cs-open" id="csOpenBtn">상담하기</button></div>
+</footer>
+
+<div class="cs-overlay" id="csOverlay" hidden>
+  <div class="cs-phone" role="dialog" aria-modal="true" aria-label="상담하기">
+    <div class="cs-notch"></div>
+    <div class="cs-screen">
+      <button type="button" class="cs-x" id="csCloseBtn" aria-label="닫기">×</button>
+      <div class="cs-dots" id="csDots"></div>
+      <div class="cs-body" id="csBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= 설정 ================= */
+const SERVICE_KEY = "c96b9868b0a4746d0488f6ce390f004e89e8438422579021c39c0e765310f0f1";
+const BASE = "https://apis.data.go.kr/1160100/service";
+const OUTLINE_URL = `${BASE}/GetCorpBasicInfoService_V2/getCorpOutline_V2`;
+const FINA_URL    = `${BASE}/GetFinaStatInfoService_V2/getSummFinaStat_V2`;
+const YEARS = 5;
+const TIMEOUT_MS = 12000;
+const TIER_CONCURRENCY = 4;
+
+const TIERS = [
+  { id: "t1", label: "1단계 초대형", desc: "총자산 5조 이상", min: 5e12 },
+  { id: "t2", label: "2단계 대형",   desc: "5천억 ~ 5조",     min: 5e11 },
+  { id: "t3", label: "3단계 중형",   desc: "500억 ~ 5천억",   min: 5e10 },
+  { id: "t4", label: "4단계 소형",   desc: "500억 미만",      min: -Infinity },
+];
+const UNKNOWN = { id: "unk", label: "미확인", desc: "재무 데이터 없음" };
+const tierOf = (a) => a == null ? UNKNOWN : TIERS.find((t) => a >= t.min);
+const tierById = (id) => id === UNKNOWN.id ? UNKNOWN : TIERS.find((t) => t.id === id);
+
+const KEYWORDS = ["메리츠자산운용", "삼성전자", "현대자동차", "1746110000741"];
+
+/* 로컬 프록시(server.py) 우선 → 직접 호출 → 외부 중계 서버 */
+const PROXIES = [
+  { name: "로컬 프록시",    make: (u) => `/proxy?url=${encodeURIComponent(u)}` },
+  { name: "직접 호출",      make: (u) => u },
+  { name: "corsproxy.io",   make: (u) => `https://corsproxy.io/?url=${encodeURIComponent(u)}` },
+  { name: "allorigins.win", make: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
+];
+
+/* ================= 유틸 ================= */
+const $ = (id) => document.getElementById(id);
+const form = $("form"), q = $("q"), btn = $("btn"), result = $("result"), autoTier = $("autoTier");
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+}[c]));
+const fmtCrno = (n = "") => (n.length === 13 ? `${n.slice(0, 6)}-${n.slice(6)}` : n);
+
+function fmtWon(v) {
+  if (v === undefined || v === null || v === "") return null;
+  const n = Number(v);
+  if (Number.isNaN(n)) return null;
+  const sign = n < 0 ? "-" : "";
+  const eok = Math.round(Math.abs(n) / 1e8);
+  if (eok >= 10000) {
+    const jo = Math.floor(eok / 10000), rest = eok % 10000;
+    return `${sign}${jo.toLocaleString()}조${rest ? ` ${rest.toLocaleString()}억` : ""}`;
+  }
+  if (eok === 0 && n !== 0) return `${sign}${Math.round(Math.abs(n) / 1e4).toLocaleString()}만`;
+  return `${sign}${eok.toLocaleString()}억`;
+}
+const fmtPct = (v) => (v === undefined || v === null || v === "" || isNaN(Number(v)) ? null : `${Number(v).toFixed(1)}%`);
+
+const ROWS = [
+  ["enpSaleAmt",  "매출액",     fmtWon],
+  ["enpBzopPft",  "영업이익",   fmtWon],
+  ["enpCrtmNpf",  "당기순이익", fmtWon],
+  ["enpTastAmt",  "총자산",     fmtWon],
+  ["enpTdbtAmt",  "총부채",     fmtWon],
+  ["enpTcptAmt",  "총자본",     fmtWon],
+  ["enpCptlAmt",  "자본금",     fmtWon],
+  ["fnclDebtRto", "부채비율",   fmtPct],
+];
+const KPIS = [["enpSaleAmt", "매출액"], ["enpBzopPft", "영업이익"], ["enpTastAmt", "총자산"]];
+
+function dedupe(arr, keyFn) {
+  const map = new Map();
+  for (const it of arr) {
+    const k = keyFn(it), old = map.get(k);
+    if (!old || String(it.basDt ?? "") > String(old.basDt ?? "")) map.set(k, it);
+  }
+  return [...map.values()];
+}
+
+async function runPool(tasks, limit) {
+  let i = 0;
+  const worker = async () => { while (i < tasks.length) { const t = tasks[i++]; await t(); } };
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+}
+
+/* ================= 에러 / 상태 ================= */
+class AppError extends Error {
+  constructor(title, causes = [], detail = "") { super(title); this.title = title; this.causes = causes; this.detail = detail; }
+}
+function showError(e) {
+  const title = e.title || e.message || "알 수 없는 오류";
+  const causes = e.causes || [];
+  result.innerHTML = `
+    <div class="err">
+      <b>${esc(title)}</b>
+      ${causes.length ? `<ul>${causes.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}
+      ${e.detail ? `<details open><summary>상세 정보</summary><pre>${esc(e.detail)}</pre></details>` : ""}
+    </div>`;
+}
+
+let busy = false;
+function setBusy(on, text = "") {
+  busy = on;
+  btn.disabled = on;
+  btn.textContent = on ? "검색 중" : "검색";
+  if (on) result.innerHTML = `<div class="msg"><div class="spin"></div>${esc(text)}</div>`;
+}
+const idle = () => { busy = false; btn.disabled = false; btn.textContent = "검색"; };
+
+/* ================= 네트워크 ================= */
+async function timedFetch(url) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try { return await fetch(url, { signal: ctrl.signal }); }
+  finally { clearTimeout(t); }
+}
+
+const route = { via: null };
+async function fetchText(url) {
+  const attempts = [];
+  const order = [...PROXIES];
+  if (route.via) order.sort((a, b) => (a.name === route.via ? -1 : b.name === route.via ? 1 : 0));
+
+  for (const p of order) {
+    try {
+      const res = await timedFetch(p.make(url));
+      const text = await res.text();
+      if (!text.trim()) throw new Error("빈 응답");
+      if (!/resultCode|returnReasonCode|returnAuthMsg|errMsg/.test(text))
+        throw new Error(`API 응답이 아님 (HTTP ${res.status})`);
+      route.via = p.name;
+      return { text, via: p.name, status: res.status };
+    } catch (e) {
+      attempts.push(`${p.name}: ${e.name === "AbortError" ? "시간 초과" : e.message}`);
+    }
+  }
+  throw new AppError("API 서버에 연결하지 못했습니다", [
+    "터미널에서 python server.py 를 실행했는지, 주소가 http://localhost:8000/ 로 시작하는지 확인하세요.",
+    "파일을 더블클릭(file://)으로 열면 로컬 프록시를 쓸 수 없습니다.",
+    "광고 차단 확장 프로그램, 방화벽, VPN이 막고 있을 수 있습니다.",
+  ], attempts.join("\n"));
+}
+
+const cache = new Map();
+function callApi(baseUrl, params) {
+  const key = baseUrl + JSON.stringify(params);
+  if (cache.has(key)) return cache.get(key);
+  const p = doCall(baseUrl, params).catch((e) => { cache.delete(key); throw e; });
+  cache.set(key, p);
+  return p;
+}
+
+async function doCall(baseUrl, params) {
+  const qs = new URLSearchParams({ serviceKey: SERVICE_KEY, resultType: "json", pageNo: "1", ...params });
+  const { text, via, status } = await fetchText(`${baseUrl}?${qs}`);
+
+  let data = null;
+  try { data = JSON.parse(text); } catch {}
+
+  if (!data) {
+    const m = text.match(/<returnAuthMsg>(.*?)<\/returnAuthMsg>/) || text.match(/<errMsg>(.*?)<\/errMsg>/);
+    const code = (text.match(/<returnReasonCode>(.*?)<\/returnReasonCode>/) || [])[1];
+    const hints = [];
+    if (m && /NOT_REGISTERED|SERVICE_KEY/i.test(m[1])) {
+      hints.push("인증키가 틀렸거나 발급 직후라 아직 반영되지 않았습니다(최대 1~2시간).",
+                 "포털 마이페이지에서 해당 API 활용신청이 '승인' 상태인지 확인하세요.",
+                 "Decoding(일반) 인증키를 써야 합니다.");
+    } else if (m && /LIMITED/i.test(m[1])) {
+      hints.push("오늘 사용 가능한 트래픽을 모두 썼습니다. 내일 다시 시도하세요.");
+    } else {
+      hints.push("상세 정보의 응답 원문을 확인하세요.");
+    }
+    throw new AppError(`API 오류${code ? ` (코드 ${code})` : ""}: ${m ? m[1] : "JSON이 아닌 응답"}`, hints,
+      `경로: ${via}\nHTTP ${status}\n\n${text.slice(0, 800)}`);
+  }
+
+  const header = data?.response?.header ?? data;
+  const rc = header?.resultCode;
+  if (rc === "03") return { totalCount: 0, items: [], via };
+  if (rc !== "00") {
+    const map = {
+      "10": "요청 변수가 올바르지 않습니다.",
+      "12": "서비스 주소 또는 상세기능 이름이 올바르지 않습니다.",
+      "20": "이 API 활용신청이 승인되지 않았습니다.",
+      "22": "일일 트래픽을 초과했습니다.",
+      "30": "등록되지 않은 인증키입니다.",
+      "31": "인증키 활용 기간이 만료되었습니다.",
+    };
+    throw new AppError(`API 오류 (코드 ${rc ?? "?"}): ${header?.resultMsg ?? "알 수 없음"}`,
+      map[rc] ? [map[rc]] : [], `경로: ${via}\n\n${text.slice(0, 800)}`);
+  }
+
+  const body = data.response.body;
+  let items = body?.items?.item ?? [];
+  if (!Array.isArray(items)) items = [items];
+  return { totalCount: Number(body?.totalCount ?? items.length), items, via };
+}
+
+/* ================= 재무 데이터 ================= */
+async function fetchFinRows(crno, years) {
+  const settled = await Promise.allSettled(
+    years.map((y) => callApi(FINA_URL, { numOfRows: "10", crno, bizYear: String(y) }))
+  );
+  const failed = settled.filter((s) => s.status === "rejected");
+  if (failed.length === settled.length) throw failed[0].reason;
+
+  const all = [];
+  let via = "";
+  settled.forEach((s, idx) => {
+    if (s.status !== "fulfilled") return;
+    via = s.value.via;
+    for (const i of s.value.items) {
+      all.push({ ...i, _year: years[idx], _kind: i.fnclDcd ?? "-", _kindNm: i.fnclDcdNm || i.fnclDcd || "재무제표" });
+    }
+  });
+
+  const rows = dedupe(all, (r) => `${r._year}|${r._kind}`);
+  const warnings = [...new Set(failed.map((f) => f.reason.title || f.reason.message))];
+  return { rows, warnings, via };
+}
+
+async function latestAsset(crno) {
+  const y = new Date().getFullYear();
+  for (const year of [y - 1, y - 2]) {
+    const { items } = await callApi(FINA_URL, { numOfRows: "10", crno, bizYear: String(year) });
+    const assets = dedupe(items, (r) => r.fnclDcd ?? "-")
+      .map((r) => Number(r.enpTastAmt)).filter((n) => Number.isFinite(n));
+    if (assets.length) return Math.max(...assets);
+  }
+  return null;
+}
+
+/* ================= 화면 상태 ================= */
+let viewToken = 0, listToken = 0, view = "home", list = null;
+
+function showHome() {
+  viewToken++; listToken++; view = "home"; list = null;
+  result.innerHTML = `
+    <section class="hero">
+      <h1>기업의 숫자,<br>한 번에 확인하세요.</h1>
+      <p>회사명 또는 법인등록번호로 검색하면 최근 5개년 요약재무제표를 보여드립니다.<br>
+         검색 결과는 총자산 기준 규모 단계로 나눠서 볼 수 있습니다.</p>
+      <div class="kw-title">추천 검색어</div>
+      <div class="kws">${KEYWORDS.map((k) => `<button type="button" class="kw" data-kw="${esc(k)}">${esc(k)}</button>`).join("")}</div>
+    </section>`;
+}
+$("logo").addEventListener("click", () => { if (!busy) { q.value = ""; showHome(); } });
+
+/* ================= 검색 ================= */
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (busy) return;
+  const v = q.value.trim();
+  if (!v) return showError(new AppError("회사명 또는 법인등록번호를 입력해주세요."));
+
+  const digits = v.replace(/[-\s]/g, "");
+  try {
+    if (/^\d{13}$/.test(digits))   await loadFin(digits, "", false);
+    else if (/^\d+$/.test(digits)) showError(new AppError(`법인등록번호는 13자리입니다. (입력: ${digits.length}자리)`));
+    else                           await searchName(v);
+  } catch (err) {
+    showError(err);
+  } finally {
+    idle();
+  }
+});
+
+async function searchName(name) {
+  const token = ++listToken;
+  viewToken++;
+  view = "search";
+  setBusy(true, `"${name}" 검색 중…`);
+  const res = await callApi(OUTLINE_URL, { numOfRows: "30", corpNm: name });
+
+  const items = dedupe(res.items, (i) => i.crno);
+  if (!items.length) {
+    view = "empty"; list = null;
+    result.innerHTML = `<div class="msg">"${esc(name)}" 검색 결과가 없습니다.<br>
+      법인명이 정확히 일치해야 검색됩니다. (주) 표기, 띄어쓰기를 바꿔 보세요.</div>`;
+    return;
+  }
+
+  list = { items, totalCount: res.totalCount, removed: res.items.length - items.length,
+           via: res.via, tiers: {}, filter: "all", done: 0, total: 0, name };
+  view = "list";
+  drawList();
+  idle();
+  if (autoTier.checked) classify(token);
+}
+
+async function classify(token) {
+  const my = list;
+  const targets = my.items.map((i) => i.crno);
+  my.total = targets.length; my.done = 0;
+  drawList();
+  await runPool(targets.map((crno) => async () => {
+    if (token !== listToken) return;
+    try { const a = await latestAsset(crno); my.tiers[crno] = tierOf(a).id; }
+    catch { my.tiers[crno] = UNKNOWN.id; }
+    my.done++;
+    if (token === listToken) drawList();
+  }), TIER_CONCURRENCY);
+}
+
+function drawList() {
+  if (!list || view !== "list") return;
+  const tierId = (crno) => list.tiers[crno] ?? null;
+  const counts = { all: list.items.length };
+  [...TIERS, UNKNOWN].forEach((t) => (counts[t.id] = 0));
+  list.items.forEach((i) => { const t = tierId(i.crno); if (t) counts[t]++; });
+
+  const shown = list.items.filter((i) => list.filter === "all" || tierId(i.crno) === list.filter);
+  const hasTiers = list.total > 0;
+  const classifying = hasTiers && list.done < list.total;
+
+  const chips = hasTiers ? `
+    <div class="chips">
+      ${[{ id: "all", label: "전체" }, ...TIERS, UNKNOWN].map((t) => `
+        <button type="button" class="chip ${list.filter === t.id ? "on" : ""}" data-tier="${t.id}" title="${esc(t.desc || "")}">
+          ${esc(t.label)}<small>${counts[t.id]}</small>
+        </button>`).join("")}
+    </div>
+    ${classifying ? `<div class="progress">규모 분류 중 ${list.done}/${list.total}</div>
+      <div class="bar"><i style="width:${Math.round(list.done / list.total * 100)}%"></i></div>` : ""}` : "";
+
+  const tag = (crno) => {
+    if (!hasTiers) return "";
+    const id = tierId(crno);
+    if (!id) return `<span class="tag">분류 중</span>`;
+    const t = tierById(id);
+    return `<span class="tag ${t.id}">${esc(t.label)}</span>`;
+  };
+
+  result.innerHTML = `
+    <div class="list-head">
+      <h2>"${esc(list.name)}" 검색결과 <em>${shown.length}</em></h2>
+      <small>총 ${esc(list.totalCount)}건 · 중복 ${list.removed}건 제거 · 경로: ${esc(list.via)}</small>
+    </div>
+    ${chips}
+    ${shown.length ? `<div class="grid">${shown.map((i) => `
+      <article class="card" tabindex="0" data-crno="${esc(i.crno)}" data-name="${esc(i.corpNm)}">
+        <div class="thumb">${esc(String(i.corpNm || "?").replace(/^\(?주\)?\s*|^주식회사\s*/, "").charAt(0) || "?")}${tag(i.crno)}</div>
+        <div class="nm">${esc(i.corpNm)}</div>
+        <div class="sub">대표 ${esc(i.enpRprFnm) || "-"}<br>${esc(i.enpBsadr) || ""}</div>
+        <div class="no">${esc(fmtCrno(i.crno))}</div>
+      </article>`).join("")}</div>` : `<div class="msg">이 단계에 해당하는 기업이 없습니다.</div>`}`;
+}
+
+/* ================= 클릭 처리 ================= */
+result.addEventListener("click", async (e) => {
+  const kw = e.target.closest(".kw");
+  if (kw) { q.value = kw.dataset.kw; return form.requestSubmit(); }
+
+  const chip = e.target.closest(".chip");
+  if (chip && list) { list.filter = chip.dataset.tier; return drawList(); }
+
+  if (e.target.closest(".back")) {
+    viewToken++;
+    if (list) { view = "list"; drawList(); } else showHome();
+    return;
+  }
+
+  const card = e.target.closest(".card[data-crno]");
+  if (!card || busy) return;
+  try { await loadFin(card.dataset.crno, card.dataset.name, true); }
+  catch (err) { showError(err); }
+  finally { idle(); }
+});
+result.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.classList?.contains("card")) e.target.click();
+});
+
+/* ================= 재무제표 ================= */
+async function loadFin(crno, name, fromList) {
+  const token = ++viewToken;
+  view = "detail";
+  if (!fromList) { list = null; listToken++; }
+  setBusy(true, `최근 ${YEARS}개년 재무제표를 불러오는 중…`);
+
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: YEARS }, (_, k) => thisYear - 1 - k);
+
+  const namePromise = name ? Promise.resolve(name)
+    : callApi(OUTLINE_URL, { numOfRows: "1", crno })
+        .then((r) => r.items[0]?.corpNm || "").catch(() => "");
+
+  const [{ rows, warnings, via }, finalName] =
+    await Promise.all([fetchFinRows(crno, years), namePromise]);
+  if (token !== viewToken) return;
+  name = finalName;
+
+  if (!rows.length) {
+    result.innerHTML = `
+      <button type="button" class="back">← ${fromList && list ? "검색 결과로" : "처음으로"}</button>
+      <div class="msg">법인등록번호 ${esc(fmtCrno(crno))} 의 재무제표 데이터가 없습니다.<br>
+      금융위원회에 재무정보가 등록되지 않은 기업일 수 있습니다. (외부감사 대상 기업 위주)</div>`;
+    return;
+  }
+  renderFin({ crno, name, rows, via, warnings, fromList });
+}
+
+function renderFin({ crno, name, rows, via, warnings, fromList }) {
+  const kinds = [...new Map(rows.map((r) => [r._kind, r._kindNm])).entries()];
+  let current = kinds[0][0];
+
+  const latestYear = Math.max(...rows.map((r) => r._year));
+  const assets = rows.filter((r) => r._year === latestYear).map((r) => Number(r.enpTastAmt)).filter(Number.isFinite);
+  const tier = tierOf(assets.length ? Math.max(...assets) : null);
+    const raw = rows[0];
+
+  const draw = () => {
+    const cur = rows.filter((r) => r._kind === current);
+    const years = [...new Set(cur.map((r) => r._year))].sort((a, b) => a - b);
+    const byYear = Object.fromEntries(cur.map((r) => [r._year, r]));
+    const last = byYear[years[years.length - 1]] || {};
+
+    $("kpis").innerHTML = KPIS.map(([key, label]) => {
+      const txt = fmtWon(last[key]);
+      return `<div class="kpi"><div class="k">${years[years.length - 1]}년 ${label}</div>
+        <div class="v ${Number(last[key]) < 0 ? "neg" : ""}">${txt === null ? "-" : esc(txt)}</div></div>`;
+    }).join("");
+
+    const head = `<tr><th>항목</th>${years.map((y) => `<th>${y}</th>`).join("")}</tr>`;
+    const body = ROWS.map(([key, label, fmt]) => {
+      const tds = years.map((y) => {
+        const v = byYear[y]?.[key];
+        const txt = fmt(v);
+        if (txt === null) return `<td class="na">-</td>`;
+        const tip = key === "fnclDebtRto" ? "" : ` title="${esc(Number(v).toLocaleString())}원"`;
+        return `<td class="${Number(v) < 0 ? "neg" : ""}"${tip}>${esc(txt)}</td>`;
+      }).join("");
+      return `<tr><td>${label}</td>${tds}</tr>`;
+    }).join("");
+
+    $("tbl").innerHTML = `<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
+    document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.dataset.k === current));
+  };
+
+  result.innerHTML = `
+    <button type="button" class="back">← ${fromList && list ? "검색 결과로" : "처음으로"}</button>
+    <div class="d-top">
+      <div>
+        <span class="lbl ${tier.id}">${esc(tier.label)}</span>
+        <h2>${esc(name || "재무제표")}</h2>
+        <div class="no">${esc(fmtCrno(crno))}</div>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="tabs">
+      ${kinds.map(([k, n]) => `<button type="button" class="tab" data-k="${esc(k)}">${esc(n)}</button>`).join("")}
+    </div>
+    <div class="scroll" id="tbl"></div>
+    <div class="note">
+      금액은 억 원 단위로 반올림해 표시했습니다. 숫자에 마우스를 올리면 원 단위 값이 보입니다.<br>
+      규모 단계는 ${latestYear}년 총자산 기준입니다 (${esc(tier.desc)}). 데이터 수신 경로: ${esc(via)}
+    </div>
+    ${warnings.length ? `<div class="warn">일부 연도는 조회되지 않았습니다:\n${esc(warnings.join("\n"))}</div>` : ""}
+    <details>
+      <summary>원본 응답 1건 보기 (표가 '-'로만 나올 때 필드명 확인용)</summary>
+      <pre>${esc(JSON.stringify(raw, null, 2))}</pre>
+    </details>`;
+
+  result.querySelectorAll(".tab").forEach((t) =>
+    t.addEventListener("click", () => { current = t.dataset.k; draw(); })
+  );
+  draw();
+  window.scrollTo({ top: 0 });
+}
+
+/* ================= 상담하기 ================= */
+const CS_ENDPOINT   = "https://api.web3forms.com/submit";
+const CS_ACCESS_KEY = "여기에_WEB3FORMS_ACCESS_KEY";   // ← web3forms 에서 메일로 받은 키
+
+const CS_PURPOSES = [
+  { id: "tax",     ic: "₩", title: "세무·회계 상담",       desc: "세무, 회계, 재무제표 해석 관련 문의" },
+  { id: "feature", ic: "?", title: "사이트 기능 상담",     desc: "사용법, 오류, 기능 제안" },
+  { id: "owner",   ic: "✉", title: "사이트 주인에게 문의", desc: "제휴, 협업 등 그 외 문의" },
+];
+const csLabel = (id) => CS_PURPOSES.find((p) => p.id === id)?.title ?? "";
+
+const csOverlay = $("csOverlay"), csBody = $("csBody"), csDots = $("csDots");
+let cs = {};
+const csReset = () => { cs = { step: 0, purpose: null, phone: "", email: "", agree: false, sending: false, error: "" }; };
+csReset();
+
+const csFmtPhone = (s) => {
+  const d = s.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  if (d.length <= 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+};
+const csPhoneOk = (s) => /^0\d{8,10}$/.test(s.replace(/\D/g, ""));
+const csEmailOk = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
+
+function csRender() {
+  csDots.innerHTML = [0, 1, 2].map((i) => `<i class="${cs.step >= i ? "on" : ""}"></i>`).join("");
+  const dis = cs.sending ? "disabled" : "";
+  let html = "";
+
+  if (cs.step === 0) {
+    html = `
+      <h3 class="cs-h">어떤 상담이<br>필요하세요?</h3>
+      <p class="cs-sub">상담 목적을 선택해 주세요.</p>
+      ${CS_PURPOSES.map((p) => `
+        <button type="button" class="cs-opt ${cs.purpose === p.id ? "on" : ""}" data-p="${p.id}">
+          <div class="cs-ic">${p.ic}</div>
+          <div><b>${esc(p.title)}</b><span>${esc(p.desc)}</span></div>
+        </button>`).join("")}`;
+  } else if (cs.step === 1) {
+    html = `
+      <h3 class="cs-h">연락받을 번호를<br>알려주세요</h3>
+      <p class="cs-sub">전화 상담을 원하실 때만 입력하세요. 건너뛰어도 됩니다.</p>
+      <div class="cs-field"><input type="tel" id="csPhone" inputmode="numeric" autocomplete="tel"
+        placeholder="010-0000-0000" value="${esc(cs.phone)}" /></div>
+      <div class="cs-err">${esc(cs.error)}</div>
+      <div class="cs-actions">
+        <button type="button" class="cs-btn ghost" data-act="back">이전</button>
+        <button type="button" class="cs-btn ghost" data-act="skip">건너뛰기</button>
+        <button type="button" class="cs-btn" data-act="next">다음</button>
+      </div>`;
+  } else if (cs.step === 2) {
+    html = `
+      <h3 class="cs-h">답변받을<br>이메일 주소</h3>
+      <p class="cs-sub">입력하신 주소로 답변을 드립니다.</p>
+      <div class="cs-sum"><b>${esc(csLabel(cs.purpose))}</b><br>연락처: ${esc(cs.phone || "입력 안 함")}</div>
+      <div class="cs-field"><input type="email" id="csEmail" autocomplete="email"
+        placeholder="name@example.com" value="${esc(cs.email)}" ${dis} /></div>
+      <label class="cs-agree">
+        <input type="checkbox" id="csAgree" ${cs.agree ? "checked" : ""} ${dis} />
+        <span>상담 답변을 위해 입력한 전화번호와 이메일을 수집·이용하는 데 동의합니다. (답변 후 지체 없이 파기)</span>
+      </label>
+      <div class="cs-err">${esc(cs.error)}</div>
+      <div class="cs-actions">
+        <button type="button" class="cs-btn ghost" data-act="back" ${dis}>이전</button>
+        <button type="button" class="cs-btn" data-act="send" ${dis}>${cs.sending ? "전송 중…" : "확인"}</button>
+      </div>`;
+  } else {
+    html = `
+      <div class="cs-done">
+        <div class="cs-check">✓</div>
+        <h3 class="cs-h">상담 요청이<br>접수되었습니다</h3>
+        <p class="cs-sub">확인 후 입력하신 이메일로 연락드리겠습니다.</p>
+      </div>
+      <div class="cs-actions"><button type="button" class="cs-btn" data-act="close">닫기</button></div>`;
+  }
+
+  csBody.innerHTML = html;
+  csBody.querySelector("input[type=tel], input[type=email]")?.focus();
+}
+
+function csOpen()  { csReset(); csRender(); csOverlay.hidden = false; document.body.style.overflow = "hidden"; }
+function csClose() { csOverlay.hidden = true; document.body.style.overflow = ""; }
+
+function csSave() {
+  const ph = $("csPhone"), em = $("csEmail"), ag = $("csAgree");
+  if (ph) cs.phone = ph.value.trim();
+  if (em) cs.email = em.value.trim();
+  if (ag) cs.agree = ag.checked;
+}
+
+async function csSend() {
+  if (!CS_ACCESS_KEY || CS_ACCESS_KEY.startsWith("여기에")) {
+    cs.error = "CS_ACCESS_KEY 가 설정되지 않았습니다. 코드에 Web3Forms 키를 넣어주세요.";
+    return csRender();
+  }
+  cs.sending = true; cs.error = ""; csRender();
+  const phone = cs.phone || "(입력 안 함)";
+  try {
+    const res = await fetch(CS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        access_key: CS_ACCESS_KEY,
+        subject: `[CORP FINDER 상담] ${csLabel(cs.purpose)}`,
+        from_name: "CORP FINDER 상담창",
+        email: cs.email,
+        phone,
+        purpose: csLabel(cs.purpose),
+        message: `상담 목적: ${csLabel(cs.purpose)}\n연락처: ${phone}\n이메일: ${cs.email}`,
+        botcheck: "",
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) throw new Error(data.message || `HTTP ${res.status}`);
+    cs.step = 3;
+  } catch (e) {
+    cs.error = `전송에 실패했습니다. 잠시 후 다시 시도해 주세요. (${e.message})`;
+  }
+  cs.sending = false;
+  csRender();
+}
+
+csBody.addEventListener("click", (e) => {
+  if (cs.sending) return;
+  const t = e.target.closest("[data-p], [data-act]");
+  if (!t) return;
+  csSave();
+
+  if (t.dataset.p) { cs.purpose = t.dataset.p; cs.step = 1; cs.error = ""; return csRender(); }
+
+  switch (t.dataset.act) {
+    case "back": cs.step = Math.max(0, cs.step - 1); cs.error = ""; return csRender();
+    case "skip": cs.phone = ""; cs.step = 2; cs.error = ""; return csRender();
+    case "next":
+      if (cs.phone && !csPhoneOk(cs.phone)) { cs.error = "전화번호 형식이 올바르지 않습니다."; return csRender(); }
+      cs.step = 2; cs.error = ""; return csRender();
+    case "send":
+      if (!csEmailOk(cs.email)) { cs.error = "이메일 주소를 올바르게 입력해 주세요."; return csRender(); }
+      if (!cs.agree)            { cs.error = "개인정보 수집·이용에 동의해 주세요."; return csRender(); }
+      return csSend();
+    case "close": return csClose();
+  }
+});
+
+csBody.addEventListener("input", (e) => {
+  if (e.target.id === "csPhone") e.target.value = csFmtPhone(e.target.value);
+});
+csBody.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || !e.target.matches("input[type=tel], input[type=email]")) return;
+  e.preventDefault();
+  csBody.querySelector('[data-act="next"], [data-act="send"]')?.click();
+});
+
+$("csOpenBtn").addEventListener("click", csOpen);
+$("csCloseBtn").addEventListener("click", csClose);
+csOverlay.addEventListener("click", (e) => { if (e.target === csOverlay) csClose(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !csOverlay.hidden) csClose(); });
+
+/* 예상치 못한 오류도 화면에 표시 */
+window.addEventListener("error", (e) => showError(new AppError("자바스크립트 오류", [e.message], `${e.filename}:${e.lineno}`)));
+window.addEventListener("unhandledrejection", (e) => showError(e.reason instanceof AppError ? e.reason : new AppError("처리되지 않은 오류", [String(e.reason?.message || e.reason)])));
+
+showHome();
+</script>
+</body>
+</html>
